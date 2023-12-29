@@ -1,7 +1,8 @@
 # YP-tech7c-Tool
 
-**Ultimate Tool to Extract Data from Yellow Pages**
-Custom Web Scraping based tool automates Yellowpage's search
+**Ultimate Tool for Extracting Data from Yellow Pages**
+
+- Custom Web Scraping based tool automates Yellowpage's search
 
 Access it from:
 
