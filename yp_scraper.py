@@ -40,8 +40,8 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
         cnt = 0
         max_page = math.ceil(item_count / 35)
         if max_page < 2:
-            max_page = 2
-            st.write(f"Total {max_page - 1} Page")
+            # max_page = 2
+            st.write(f"Total {max_page} Page")
         else:
             st.write(f"Total {max_page} Pages")
 
