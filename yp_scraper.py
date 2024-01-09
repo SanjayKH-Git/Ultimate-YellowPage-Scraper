@@ -25,7 +25,7 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
         if direct_url:
             main_url = direct_url
         else:
-            main_url = f"https://www.yellowpages.com.au/search/listings?clue={clue}&locationClue={loc_clue}"
+            main_url = f"https://www.yellowpages.com.au/search/listings?clue={clue}&locationClue={loc_clue.replace(' ', '%20')}"
 
         st.write(f"Searching URL: {main_url}")
 
@@ -35,19 +35,19 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
         main_resp.close()
 
         item_count = int(
-            main_soup.find(
-                "h2",
-                class_="MuiTypography-root jss310 MuiTypography-body2 MuiTypography-paragraph",
-            )
-            .text.strip()
-            .split()[0]
+            dom.xpath("//h2[contains(., 'Results for')]/text()")[0].split()[0]
         )
         cnt = 0
         max_page = math.ceil(item_count / 35)
+        if max_page < 2:
+            max_page = 2
+            st.write(f"Total {max_page - 1} Page")
+        else:
+            st.write(f"Total {max_page} Pages")
+
         print(max_page)
-        st.write(f"Total {max_page} Pages")
         progress_bar = st.progress(0)
-        for page in range(1, max_page):
+        for page in range(1, max_page + 1):
             main_resp = requests.get(
                 f"{main_url}&pageNumber={page}", headers={"User-Agent": "Mozilla/5.0"}
             )
@@ -268,26 +268,19 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
         dom = etree.HTML(str(main_soup))
         main_resp.close()
 
-        item_count_text = int(
-            "".join(dom.xpath("//span[@class='pageCount']//span/text()"))
-            .split("/")[-1]
-            .strip()
+        max_page = int(
+            "".join(dom.xpath("//span[@class='pageCount']//span/text()"))[-1]
         )
 
-        item_count = int(item_count_text)
         cnt = 0
-        if item_count > 60:
-            max_page = 60
-        else:
-            max_page = math.ceil(item_count / 35)
 
         print(max_page)
         st.write(f"Total {max_page} Pages")
 
         progress_bar = st.progress(0)
 
-        for page in range(1, max_page):
-            main_url = direct_url.replace("si/1", f"si/{page}")
+        for page in range(1, max_page + 1):
+            main_url = main_url.replace("si/1", f"si/{page}")
             print(main_url)
             main_resp = requests.get(main_url, headers={"User-Agent": "Mozilla/5.0"})
             main_soup = Bs(main_resp.text, "html.parser")
@@ -322,8 +315,10 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
                 email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,4}"
                 email_list = list(set(re.findall(email_pattern, search_resp.text)))
                 if not email_list:
-                    email_list = ["",]
-                    
+                    email_list = [
+                        "",
+                    ]
+
                 result_dict = {
                     "YP URL": yp_url,
                     "Business Name": title,
@@ -345,7 +340,7 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
 
                 cnt += 1
 
-                progress_bar.progress((page / (max_page - 1)))
+                progress_bar.progress((page / (max_page)))
 
     except Exception as e:
         print(e)
@@ -361,7 +356,7 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
         if direct_url:
             main_url = direct_url
         else:
-            main_url = f"https://www.yellowpages.ca/search/si/1/{clue}/{loc_clue.replace(' ', '+')}"
+            main_url = f"https://yellow.co.nz/{loc_clue}/{clue}/page/1"
 
         st.write(f"Searching URL: {main_url}")
 
@@ -445,10 +440,14 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
                             set(re.findall(email_pattern, search_resp.text))
                         )
                         if not email_list:
-                            email_list = ["",]
-                            
+                            email_list = [
+                                "",
+                            ]
+
                     except Exception:
-                        email_list = ["",]
+                        email_list = [
+                            "",
+                        ]
 
                     result_dict = {
                         "YP URL": yp_url,
