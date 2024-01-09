@@ -355,16 +355,17 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
 
         if direct_url:
             main_url = direct_url
+            if "page" not in direct_url:
+                main_url = direct_url
+            else:
+                main_url = direct_url.split("page/")[0]
+
         else:
-            main_url = f"https://yellow.co.nz/{loc_clue}/{clue}/page/1"
+            main_url = f"https://yellow.co.nz/{loc_clue}/{clue}"
 
         st.write(f"Searching URL: {main_url}")
 
-        if "page" not in direct_url:
-            main_url = direct_url
-        else:
-            main_url = direct_url.split("page/")[0]
-
+        # print(main_url)
         main_resp = requests.get(main_url, headers={"User-Agent": "Mozilla/5.0"})
         main_soup = Bs(main_resp.text, "html.parser")
         dom = etree.HTML(str(main_soup))
@@ -380,7 +381,7 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
         progress_bar = st.progress(0)
         cnt = 0
         for page in range(1, max_page):
-            page_url = main_url + f"page/{page}"
+            page_url = main_url + f"/page/{page}"
             print(page_url)
             main_resp = requests.get(page_url, headers={"User-Agent": "Mozilla/5.0"})
             main_soup = Bs(main_resp.text, "html.parser")
