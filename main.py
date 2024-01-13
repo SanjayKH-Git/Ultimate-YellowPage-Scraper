@@ -13,7 +13,12 @@ if __name__ == "__main__":
         st.write("Enter the Searching Data")
 
         # Country dropdown options
-        countries = ["Australia", "USA", "United Kindom", "Canada", "New Zealand"]
+        countries = [
+            "Australia ---> https://www.yellowpages.com.au",
+            "USA ---> https://www.yellowpages.com",
+            "Canada ---> https://www.yellowpages.ca",
+            "New Zealand ---> https://yellow.co.nz",
+        ]
         # st.write(os.getcwd())
         # Form inputs
         country = st.selectbox("Select Country", countries)
@@ -33,13 +38,13 @@ if __name__ == "__main__":
                 if not direct_url:
                     st.write(f"Collecting Data for : {name}, {city}, {country}")
 
-                if country == "Australia":
+                if country.startswith("Australia"):
                     All_result_dict = yp_au_scrape(name, city, direct_url)
-                elif country == "USA":
+                elif country.startswith("USA"):
                     All_result_dict = yp_us_scrape(name, city, direct_url)
-                elif country == "Canada":
+                elif country.startswith("Canada"):
                     All_result_dict = yp_ca_scrape(name, city, direct_url)
-                elif country == "New Zealand":
+                elif country.startswith("New Zealand"):
                     All_result_dict = yp_nz_scrape(name, city, direct_url)
 
                 result_df = pd.DataFrame(All_result_dict.values())

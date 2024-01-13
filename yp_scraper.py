@@ -11,7 +11,6 @@ import json
 import os
 import re
 import pandas as pd
-import sqlite3
 import math
 
 
@@ -325,7 +324,7 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
                     "Website URL": website,
                     "Phone Number": phone_No,
                     "Physical Address": address,
-                    "Email": email_list,
+                    "Email": str(email_list),
                 }
                 All_result_dict[result_dict["Business Name"]] = result_dict
 
@@ -456,7 +455,7 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
                         "Website URL": website,
                         "Phone Number": phone_No,
                         "Physical Address": address,
-                        "Email": email_list,
+                        "Email": str(email_list),
                     }
                     print(result_dict)
 
