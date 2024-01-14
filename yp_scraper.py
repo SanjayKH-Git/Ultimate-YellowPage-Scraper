@@ -141,7 +141,6 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
 
 def yp_us_scrape(clue="", loc_clue="", direct_url=""):
     try:
-        print("canada")
         All_result_dict = {}
         output_file = "Output_Files/yp_us.csv"
 
@@ -156,6 +155,7 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
         main_soup = Bs(main_resp.text, "html.parser")
         dom = etree.HTML(str(main_soup))
         main_resp.close()
+
 
         item_count_text = "".join(
             dom.xpath("//span[@class='showing-count']/text()")
