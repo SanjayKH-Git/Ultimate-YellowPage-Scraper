@@ -48,9 +48,9 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
         progress_bar = st.progress(0)
         for page in range(1, max_page + 1):
             main_resp = requests.get(
-                f"{main_url}&pageNumber={page}", headers={"User-Agent": "Mozilla/5.0"}
+                f"{main_url}/page-{page}", headers={"User-Agent": "Mozilla/5.0"}
             )
-            print(f"{main_url}&pageNumber={page}")
+            print(f"{main_url}/page-{page}")
 
             main_soup = Bs(main_resp.text, "html.parser")
             dom = etree.HTML(str(main_soup))
@@ -85,22 +85,30 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
                     yp_dom = etree.HTML(str(yp_soup))
                     yp_resp.close()
 
-                    email = "".join(
-                        yp_dom.xpath(
-                            "//a[@class='contact contact-main contact-email']/@data-email"
-                        )
+                    email_list = yp_dom.xpath(
+                        "//a[@class='contact contact-main contact-email']/@data-email"
                     )
-                    if not email:
-                        Google_Search_url = (
-                            f"https://www.google.com/search?q={title}+email+address"
+
+                    Google_Search_url = (
+                        f"https://www.google.com/search?q={title}+email+address"
+                    )
+                    search_resp = requests.get(
+                        Google_Search_url, headers={"User-Agent": "Mozilla/5.0"}
+                    )
+                    email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,4}"
+
+                    email = list(set(re.findall(email_pattern, search_resp.text)))
+                    email_list += email if email else []
+
+                    try:
+                        web_resp = requests.get(
+                            website, headers={"User-Agent": "Mozilla/5.0"}
                         )
-                        search_resp = requests.get(
-                            Google_Search_url, headers={"User-Agent": "Mozilla/5.0"}
-                        )
-                        email_pattern = (
-                            r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,4}"
-                        )
-                        email = ", ".join(re.findall(email_pattern, search_resp.text))
+                        email = list(set(re.findall(email_pattern, web_resp.text)))
+                        email_list += email if email else []
+                        web_resp.close()
+                    except Exception as e:
+                        pass
 
                     address = "".join(
                         yp_dom.xpath(
@@ -114,7 +122,7 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
                         "Website URL": website,
                         "phone_No Number": phone_No,
                         "Physical Address": address,
-                        "Email": email,
+                        "Email": str(email_list),
                     }
                     All_result_dict[result_dict["Business Name"]] = result_dict
 
@@ -131,7 +139,7 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
                 except Exception as e:
                     print(e)
 
-            progress_bar.progress((page / (max_page - 1)))
+            progress_bar.progress((page / (max_page)))
 
     except Exception as e:
         print(e)
@@ -155,7 +163,6 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
         main_soup = Bs(main_resp.text, "html.parser")
         dom = etree.HTML(str(main_soup))
         main_resp.close()
-
 
         item_count_text = "".join(
             dom.xpath("//span[@class='showing-count']/text()")
@@ -214,6 +221,32 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
                 except Exception:
                     email = ""
 
+                email_list = []
+                try:
+                    email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,4}"
+
+                    try:
+                        web_resp = requests.get(
+                            website, headers={"User-Agent": "Mozilla/5.0"}
+                        )
+                        email_list = list(set(re.findall(email_pattern, web_resp.text)))
+                        if email:
+                            email_list += [email]
+
+                    except Exception as e:
+                        pass
+
+                    Google_Search_url = (
+                        f"https://www.google.com/search?q={title}+email+address"
+                    )
+                    search_resp = requests.get(
+                        Google_Search_url, headers={"User-Agent": "Mozilla/5.0"}
+                    )
+                    email_list += list(set(re.findall(email_pattern, search_resp.text)))
+
+                except Exception as e:
+                    pass
+
                 try:
                     address = "".join(
                         biz_dom.xpath("//span[contains(., 'Address:')]/../text()")
@@ -227,7 +260,7 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
                     "Website URL": website,
                     "Phone Number": phone_No,
                     "Physical Address": address,
-                    "Email": email,
+                    "Email": str(email_list),
                 }
                 All_result_dict[result_dict["Business Name"]] = result_dict
 
@@ -242,7 +275,7 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
 
                 cnt += 1
 
-                progress_bar.progress((page / (max_page - 1)))
+            progress_bar.progress((page / (max_page - 1)))
 
     except Exception as e:
         print(e)
@@ -293,11 +326,20 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
                 yp_a = div.xpath(
                     ".//a[@class='listing__name--link listing__link jsListingName']"
                 )[0]
+
                 yp_url = "https://www.yellowpages.ca" + yp_a.get("href")
+
                 title = "".join(yp_a.xpath("./text()"))
-                website = "https://www.yellowpages.ca" + "".join(
-                    div.xpath(".//a[@class='mlr__item__cta']/@href")
-                )
+
+                # Chopping Unwanted things
+                website = ""
+                web_url_d = "".join(div.xpath(".//a[@class='mlr__item__cta']/@href"))
+                if web_url_d:
+                    if "facebook.com" not in web_url_d:
+                        website = "http://" + web_url_d.split("%2F")[-2]
+                    else:
+                        website = "https://www.yellowpages.ca" + web_url_d
+
                 phone_No = "".join(
                     div.xpath(".//li[@class='mlr__submenu__item']/h4/text()")
                 )
@@ -317,6 +359,25 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
                     email_list = [
                         "",
                     ]
+
+                try:
+                    # Finding yp_url
+                    if website:
+                        # print(website)
+                        web_resp = requests.get(
+                            website, headers={"User-Agent": "Mozilla/5.0"}
+                        )
+                        # yp_soup = Bs(yp_resp.text, "html.parser")
+                        website = web_resp.url
+
+                        email_list += list(
+                            set(re.findall(email_pattern, web_resp.text))
+                        )
+                        # dom = etree.HTML(str(main_soup))
+                        web_resp.close()
+                except Exception as e:
+                    # print(e)
+                    pass
 
                 result_dict = {
                     "YP URL": yp_url,
@@ -339,7 +400,7 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
 
                 cnt += 1
 
-                progress_bar.progress((page / (max_page)))
+            progress_bar.progress((page / (max_page)))
 
     except Exception as e:
         print(e)
@@ -472,11 +533,11 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
 
                     cnt += 1
 
-                    progress_bar.progress((page / (max_page - 1)))
-
                 except Exception as e:
                     print(e)
-
+                
+                progress_bar.progress((page / (max_page - 1)))
+                
     except Exception as e:
         print(e)
 

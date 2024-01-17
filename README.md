@@ -19,12 +19,12 @@
 #### Tech Stacks:
 
 > <sub>![Python][Python]</sub>
->
-> > ![Streamlit][Streamlit]
-> > ![requests][requests]
-> > ![beautifulsoup4][beautifulsoup4]
-> > ![lxml][lxml]
-> > ![pandas][pandas] >> ![googlesearch-python][googlesearch-python]
+>> ![Streamlit][Streamlit] 
+>> ![requests][requests] 
+>> ![beautifulsoup4][beautifulsoup4] 
+>> ![lxml][lxml] 
+>> ![pandas][pandas]
+>> ![googlesearch-python][googlesearch-python]
 
 [Python]: https://img.shields.io/badge/-Python-07065c?style=plastic&logo=python&logoColor=white
 [Streamlit]: https://img.shields.io/badge/-Streamlit-red?style=plastic&logo=streamlit&logoColor=white
