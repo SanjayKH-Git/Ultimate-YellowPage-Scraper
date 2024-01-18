@@ -47,10 +47,13 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
         print(max_page)
         progress_bar = st.progress(0)
         for page in range(1, max_page + 1):
-            main_resp = requests.get(
-                f"{main_url}/page-{page}", headers={"User-Agent": "Mozilla/5.0"}
-            )
-            print(f"{main_url}/page-{page}")
+            if "find/" in main_url:
+                page_url = f"{main_url}/page-{page}"
+            else:
+                page_url = f"{main_url}&pageNumber={page}"
+
+            main_resp = requests.get(page_url, headers={"User-Agent": "Mozilla/5.0"})
+            print(page_url)
 
             main_soup = Bs(main_resp.text, "html.parser")
             dom = etree.HTML(str(main_soup))
@@ -217,24 +220,39 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
                     phone_No = ""
 
                 try:
-                    email = json_script["email"].replace("mailto:", "")
+                    email_list = json_script["email"].replace("mailto:", "")
                 except Exception:
-                    email = ""
+                    email_list = ""
 
                 email_list = []
                 try:
                     email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,4}"
 
-                    try:
-                        web_resp = requests.get(
-                            website, headers={"User-Agent": "Mozilla/5.0"}
-                        )
-                        email_list = list(set(re.findall(email_pattern, web_resp.text)))
-                        if email:
-                            email_list += [email]
+                    if not email_list:
+                        try:
+                            Google_Search_url = f"https://www.google.com/search?q={website}+email+address"
+                            search_resp = requests.get(
+                                Google_Search_url,
+                                headers={"User-Agent": "Mozilla/5.0"},
+                            )
+                            email_list = list(
+                                set(re.findall(email_pattern, search_resp.text))
+                            )
+                            # print(email_list)
+                            web_resp = requests.get(
+                                website,
+                                headers={"User-Agent": "Mozilla/5.0"},
+                                timeout=4,
+                            )
+                            email_list = list(
+                                set(
+                                    email_list
+                                    + re.findall(email_pattern, web_resp.text)
+                                )
+                            )
 
-                    except Exception as e:
-                        pass
+                        except Exception as e:
+                            pass
 
                     Google_Search_url = (
                         f"https://www.google.com/search?q={title}+email+address"
@@ -242,7 +260,9 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
                     search_resp = requests.get(
                         Google_Search_url, headers={"User-Agent": "Mozilla/5.0"}
                     )
-                    email_list += list(set(re.findall(email_pattern, search_resp.text)))
+                    email_list = list(
+                        set(email_list + re.findall(email_pattern, search_resp.text))
+                    )
 
                 except Exception as e:
                     pass
@@ -296,6 +316,7 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
         st.write(f"Searching URL: {main_url}")
 
         main_resp = requests.get(main_url, headers={"User-Agent": "Mozilla/5.0"})
+        main_url = main_resp.url.split(";")[0]
         main_soup = Bs(main_resp.text, "html.parser")
         dom = etree.HTML(str(main_soup))
         main_resp.close()
@@ -312,7 +333,9 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
         progress_bar = st.progress(0)
 
         for page in range(1, max_page + 1):
-            main_url = main_url.replace("si/1", f"si/{page}")
+            kp = main_url.split("si/")
+            # print(kp)
+            main_url = f"{kp[0]}si/{page}/{'/'.join(kp[1].split('/')[1:])}"
             print(main_url)
             main_resp = requests.get(main_url, headers={"User-Agent": "Mozilla/5.0"})
             main_soup = Bs(main_resp.text, "html.parser")
@@ -321,84 +344,100 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
 
             ca_card_list = dom.xpath("//div[@class='listing__content__wrapper']")
 
-            # for title, yp_url in ca_card_list:
             for div in ca_card_list:
-                yp_a = div.xpath(
-                    ".//a[@class='listing__name--link listing__link jsListingName']"
-                )[0]
-
-                yp_url = "https://www.yellowpages.ca" + yp_a.get("href")
-
-                title = "".join(yp_a.xpath("./text()"))
-
-                # Chopping Unwanted things
-                website = ""
-                web_url_d = "".join(div.xpath(".//a[@class='mlr__item__cta']/@href"))
-                if web_url_d:
-                    if "facebook.com" not in web_url_d:
-                        website = "http://" + web_url_d.split("%2F")[-2]
-                    else:
-                        website = "https://www.yellowpages.ca" + web_url_d
-
-                phone_No = "".join(
-                    div.xpath(".//li[@class='mlr__submenu__item']/h4/text()")
-                )
-                address = " ".join(
-                    div.xpath(".//span[@class='listing__address--full']//span/text()")
-                )
-
-                Google_Search_url = (
-                    f"https://www.google.com/search?q={title}+email+address"
-                )
-                search_resp = requests.get(
-                    Google_Search_url, headers={"User-Agent": "Mozilla/5.0"}
-                )
-                email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,4}"
-                email_list = list(set(re.findall(email_pattern, search_resp.text)))
-                if not email_list:
-                    email_list = [
-                        "",
-                    ]
-
                 try:
-                    # Finding yp_url
-                    if website:
-                        # print(website)
-                        web_resp = requests.get(
-                            website, headers={"User-Agent": "Mozilla/5.0"}
-                        )
-                        # yp_soup = Bs(yp_resp.text, "html.parser")
-                        website = web_resp.url
+                    yp_a = div.xpath(
+                        ".//a[@class='listing__name--link listing__link jsListingName']"
+                    )[0]
 
-                        email_list += list(
-                            set(re.findall(email_pattern, web_resp.text))
+                    yp_url = "https://www.yellowpages.ca" + yp_a.get("href")
+
+                    title = "".join(yp_a.xpath("./text()"))
+
+                    # Chopping Unwanted things
+                    website = ""
+                    web_url_d = "".join(
+                        div.xpath(".//a[@class='mlr__item__cta']/@href")
+                    )
+                    email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,4}"
+
+                    if web_url_d:
+                        if "facebook.com" not in web_url_d:
+                            website = "http://" + web_url_d.split("%2F")[-2]
+
+                            Google_Search_url = f"https://www.google.com/search?q={website}+email+address"
+                            search_resp = requests.get(
+                                Google_Search_url, headers={"User-Agent": "Mozilla/5.0"}
+                            )
+                            email_list = list(
+                                set(re.findall(email_pattern, search_resp.text))
+                            )
+
+                        else:
+                            website = "https://www.yellowpages.ca" + web_url_d
+
+                    phone_No = "".join(
+                        div.xpath(".//li[@class='mlr__submenu__item']/h4/text()")
+                    )
+                    address = " ".join(
+                        div.xpath(
+                            ".//span[@class='listing__address--full']//span/text()"
                         )
-                        # dom = etree.HTML(str(main_soup))
-                        web_resp.close()
+                    )
+
+                    Google_Search_url = (
+                        f"https://www.google.com/search?q={title}+email+address"
+                    )
+                    search_resp = requests.get(
+                        Google_Search_url, headers={"User-Agent": "Mozilla/5.0"}
+                    )
+                    email_list = list(set(re.findall(email_pattern, search_resp.text)))
+
+                    try:
+                        # Finding yp_url
+                        if website and not email_list:
+                            # print(website)
+                            web_resp = requests.get(
+                                website,
+                                headers={"User-Agent": "Mozilla/5.0"},
+                                timeout=5,
+                            )
+                            # yp_soup = Bs(yp_resp.text, "html.parser")
+                            website = web_resp.url
+
+                            email_list += list(
+                                set(re.findall(email_pattern, web_resp.text))
+                            )
+                            # dom = etree.HTML(str(main_soup))
+                            web_resp.close()
+                    except Exception as e:
+                        # print(e)
+                        pass
+
+                    result_dict = {
+                        "YP URL": yp_url,
+                        "Business Name": title,
+                        "Website URL": website,
+                        "Phone Number": phone_No,
+                        "Physical Address": address,
+                        "Email": str(email_list),
+                    }
+                    All_result_dict[result_dict["YP URL"]] = result_dict
+
+                    headers = result_dict.keys()
+
+                    df = pd.DataFrame([result_dict.values()], columns=headers)
+
+                    if cnt == 0:
+                        st_df = st.dataframe(df)
+                    else:
+                        st_df.add_rows(df)
+
+                    cnt += 1
+
                 except Exception as e:
-                    # print(e)
+                    print(e)
                     pass
-
-                result_dict = {
-                    "YP URL": yp_url,
-                    "Business Name": title,
-                    "Website URL": website,
-                    "Phone Number": phone_No,
-                    "Physical Address": address,
-                    "Email": str(email_list),
-                }
-                All_result_dict[result_dict["Business Name"]] = result_dict
-
-                headers = result_dict.keys()
-
-                df = pd.DataFrame([result_dict.values()], columns=headers)
-
-                if cnt == 0:
-                    st_df = st.dataframe(df)
-                else:
-                    st_df.add_rows(df)
-
-                cnt += 1
 
             progress_bar.progress((page / (max_page)))
 
@@ -518,7 +557,7 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
                         "Physical Address": address,
                         "Email": str(email_list),
                     }
-                    print(result_dict)
+                    # print(result_dict)
 
                     All_result_dict[result_dict["Business Name"]] = result_dict
 
@@ -535,9 +574,9 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
 
                 except Exception as e:
                     print(e)
-                
+
                 progress_bar.progress((page / (max_page - 1)))
-                
+
     except Exception as e:
         print(e)
 
