@@ -24,7 +24,7 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
         if direct_url:
             main_url = direct_url
         else:
-            main_url = f"https://www.yellowpages.com.au/search/listings?clue={clue}&locationClue={loc_clue.replace(' ', '%20')}"
+            main_url = f"https://www.yellowpages.com.au/search/listings?clue={clue.replace(' ', '+')}&locationClue={loc_clue.replace(' ', '%20')}"
 
         st.write(f"Searching URL: {main_url}")
 
@@ -559,7 +559,7 @@ def yp_nz_scrape(clue="", loc_clue="", direct_url=""):
                     }
                     # print(result_dict)
 
-                    All_result_dict[result_dict["Business Name"]] = result_dict
+                    All_result_dict[result_dict["YP URL"]] = result_dict
 
                     headers = result_dict.keys()
 
