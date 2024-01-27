@@ -1,6 +1,5 @@
 import streamlit as st
 import time
-import csv
 import googlesearch
 import requests
 from urllib.request import Request, urlopen
@@ -8,7 +7,6 @@ from bs4 import BeautifulSoup as Bs
 from lxml import etree
 from tqdm import tqdm
 import json
-import os
 import re
 import pandas as pd
 import math
@@ -151,6 +149,8 @@ def yp_au_scrape(clue="", loc_clue="", direct_url=""):
 
 
 def yp_us_scrape(clue="", loc_clue="", direct_url=""):
+    start = time.time()
+
     try:
         All_result_dict = {}
         output_file = "Output_Files/yp_us.csv"
@@ -173,9 +173,12 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
         item_count = int(item_count_text)
         cnt = 0
         max_page = math.ceil(item_count / 30)
-
         print(max_page)
         st.write(f"Total {max_page} Pages")
+
+        if max_page == 1:
+            max_page += 1
+
         progress_bar = st.progress(0)
         for page in range(1, max_page):
             main_url = main_url.split("&page")[0] + f"&page={page}"
@@ -250,6 +253,7 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
                                     + re.findall(email_pattern, web_resp.text)
                                 )
                             )
+                            web_resp.close()
 
                         except Exception as e:
                             pass
@@ -263,6 +267,7 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
                     email_list = list(
                         set(email_list + re.findall(email_pattern, search_resp.text))
                     )
+                    search_resp.close()
 
                 except Exception as e:
                     pass
@@ -299,7 +304,8 @@ def yp_us_scrape(clue="", loc_clue="", direct_url=""):
 
     except Exception as e:
         print(e)
-
+    end = time.time()
+    print(f"Time: {start - end}")
     return All_result_dict
 
 
@@ -309,9 +315,9 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
         output_file = "Output_Files/yp_ca.csv"
 
         if direct_url:
-            main_url = direct_url
+            main_url = direct_url.replace(" ", "+")
         else:
-            main_url = f"https://www.yellowpages.ca/search/si/1/{clue}/{loc_clue.replace(' ', '+')}"
+            main_url = f"https://www.yellowpages.ca/search/si/1/{clue.replace(' ', '+')}/{loc_clue.replace(' ', '+')}"
 
         st.write(f"Searching URL: {main_url}")
 
@@ -372,6 +378,7 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
                             email_list = list(
                                 set(re.findall(email_pattern, search_resp.text))
                             )
+                            search_resp.close()
 
                         else:
                             website = "https://www.yellowpages.ca" + web_url_d
@@ -391,7 +398,7 @@ def yp_ca_scrape(clue="", loc_clue="", direct_url=""):
                     search_resp = requests.get(
                         Google_Search_url, headers={"User-Agent": "Mozilla/5.0"}
                     )
-                    email_list = list(set(re.findall(email_pattern, search_resp.text)))
+                    email_list += list(set(re.findall(email_pattern, search_resp.text)))
 
                     try:
                         # Finding yp_url

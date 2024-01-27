@@ -4,7 +4,7 @@ from yp_scraper import yp_au_scrape, yp_us_scrape, yp_ca_scrape, yp_nz_scrape
 import os
 import sqlite3
 import pandas as pd
-
+import base64
 
 if __name__ == "__main__":
     try:
@@ -53,19 +53,24 @@ if __name__ == "__main__":
 
                 csv_col, json_col, sqlite_col = st.columns(3)
 
-                if csv_col.download_button(
-                    "Download CSV",
-                    result_df.to_csv(index=False).encode("utf-8"),
-                    file_name="CSV_output.csv",
-                ):
-                    st.success("CSV file downloaded successfully!")
+                csv_data = result_df.to_csv(index=False).encode("utf-8")
 
-                if json_col.download_button(
-                    "Download JSON",
-                    json_format.encode("utf-8"),
-                    file_name="JSON_output.json",
-                ):
-                    st.success("JSON file downloaded successfully!")
+                csv_base64 = base64.b64encode(csv_data).decode("utf-8")
+                csv_button_html = f"""
+                    <button style="background-color: #7b38d8; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;">
+                        <a href="data:file/csv;base64,{csv_base64}" download="CSV_output.csv" style="color: #37ff00; text-decoration: none; font-weight: bold">Download CSV</a>
+                    </button>
+                """
+                csv_col.markdown(csv_button_html, unsafe_allow_html=True)
+
+                json_format_bytes = json_format.encode("utf-8")
+                json_base64 = base64.b64encode(json_format_bytes).decode("utf-8")
+                json_button_html = f"""
+                    <button style="background-color: #0881c2; border: none; color: white; padding: 10px 20px; text-align: center; cursor: pointer; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;">
+                        <a href="data:file/json;base64,{json_base64}" download="JSON_output.json" style="color: #e2ff05; text-decoration: none; font-weight: bold; ">Download JSON</a>
+                    </button>
+                """
+                json_col.markdown(json_button_html, unsafe_allow_html=True)
 
                 # Create a temporary file for SQLite database
                 temp_file_name = "yp_sqlite_output.db"
@@ -78,17 +83,17 @@ if __name__ == "__main__":
                 with open(temp_file_name, "rb") as db_file:
                     db_bytes = db_file.read()
 
-                if sqlite_col.download_button(
-                    label="Download SQLite",
-                    data=db_bytes,
-                    key="download_sqlite",
-                    file_name=temp_file_name,
-                    mime="application/octet-stream",
-                ):
-                    st.success("SQLite database file downloaded successfully!")
+                sqlite_base64 = base64.b64encode(db_bytes).decode("utf-8")
+                sqlite_button_html = f"""
+                    <button style="background-color: #ff08f7; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;">
+                        <a href="data:file/csv;base64,{sqlite_base64}" download={temp_file_name} style="color: #9fe1e3; text-decoration: none; font-weight: bold">Download SQLite</a>
+                    </button>
+                """
+                sqlite_col.markdown(sqlite_button_html, unsafe_allow_html=True)
 
             else:
                 st.warning("Please fill in all the inputs before collecting data.")
 
     except Exception as e:
         st.warning("Check Your Inputs or Refresh the Page !")
+        print(e)
