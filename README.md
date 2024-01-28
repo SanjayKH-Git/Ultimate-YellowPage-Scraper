@@ -26,7 +26,9 @@
 
 #### Check out Complete Demo
 
-<video alt="kl" src="https://github.com/SanjayKH-Git/YP-tech7c-Tool/raw/main/YP_Exctractor_Demo.mp4" controls title="Title"></video>
+https://github.com/SanjayKH-Git/YP-tech7c-Tool/assets/56336350/9bf9a4fa-e95a-4b7a-ab0f-32d8a0a0fbed
+
+<!-- <video alt="kl" src="https://github.com/SanjayKH-Git/YP-tech7c-Tool/raw/main/YP_Exctractor_Demo.mp4" controls title="Title"></video> -->
 
 [Python]: https://img.shields.io/badge/-Python-07065c?style=plastic&logo=python&logoColor=white
 [Streamlit]: https://img.shields.io/badge/-Streamlit-red?style=plastic&logo=streamlit&logoColor=white
