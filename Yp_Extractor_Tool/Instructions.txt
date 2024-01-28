@@ -1,0 +1,18 @@
+To Run this Tool (You Must installed Python on Your System)
+
+# Open Comand Prompt
+
+# Move to "Yp_Extractor_Tool" Directory and Run Commands
+
+> cd your_path/Yp_Extractor_Tool
+
+# Install Tool (For First Time only)
+
+> ypinstall.bat
+
+
+# Run Your Web App (For Regular use) -> Go To Yp_Extractor_Tool Folder
+
+> streamlit run main.py
+
+# Tool Opens in Your Browser

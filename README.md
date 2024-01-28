@@ -17,19 +17,18 @@
 <span style="color: Yellow;">Custom Web Scraping based Tool for Automation of Yellowpage search</span>
 
 #### You can Extract More than 100 Page's Data in single Run !!!
+
 #### Tech Stacks:
 
 > <sub>![Python][Python]</sub>
 >
-> > ![Streamlit][Streamlit]
-> > ![requests][requests]
-> > ![beautifulsoup4][beautifulsoup4]
-> > ![lxml][lxml]
-> > ![pandas][pandas] >> ![googlesearch-python][googlesearch-python]
-
+> > ![Streamlit][Streamlit] > > ![requests][requests] > > ![beautifulsoup4][beautifulsoup4] > > ![lxml][lxml] > > ![pandas][pandas] >> ![googlesearch-python][googlesearch-python]
 
 #### Check out Complete Demo
-https://github.com/SanjayKH-Git/Food-Price-Clash/assets/56336350/7005d802-9be7-4880-9d37-39c8cf3ab6df
+
+https://github.com/SanjayKH-Git/YP-tech7c-Tool/blob/a236cb4cb0970acd349af36956ce1a697156776c/YP_Exctractor_Demo.mp4
+
+<!-- https://github.com/SanjayKH-Git/Food-Price-Clash/assets/56336350/7005d802-9be7-4880-9d37-39c8cf3ab6df -->
 
 [Python]: https://img.shields.io/badge/-Python-07065c?style=plastic&logo=python&logoColor=white
 [Streamlit]: https://img.shields.io/badge/-Streamlit-red?style=plastic&logo=streamlit&logoColor=white
