@@ -26,7 +26,10 @@
 
 #### Check out Complete Demo
 
-https://github.com/SanjayKH-Git/YP-tech7c-Tool/blob/a236cb4cb0970acd349af36956ce1a697156776c/YP_Exctractor_Demo.mp4
+<!-- https://github.com/SanjayKH-Git/YP-tech7c-Tool/blob/a236cb4cb0970acd349af36956ce1a697156776c/YP_Exctractor_Demo.mp4 -->
+![YP_Exctractor_Demo](https://github.com/SanjayKH-Git/YP-tech7c-Tool/raw/28bbf0cdb4d9849af675c18b3e1ee84ff9c34de3/YP_Exctractor_Demo.mp4)
+
+https://github.com/SanjayKH-Git/YP-tech7c-Tool/raw/main/YP_Exctractor_Demo.mp4
 
 <!-- https://github.com/SanjayKH-Git/Food-Price-Clash/assets/56336350/7005d802-9be7-4880-9d37-39c8cf3ab6df -->
 
