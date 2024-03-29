@@ -1,4 +1,4 @@
-<h2 style="color: Yellow;">YP-tech7c-Tool</h2>
+<h2 style="color: Yellow;">Ultimate-YellowPage-Scraper</h2>
 
 **Ultimate Tool for Extracting <span style="color: Yellow;">Yellow Page Data</span>**
 
